@@ -94,8 +94,7 @@ export function buildDockerExecArgs(params: {
   const pathExport = hasCustomPath
     ? 'export PATH="${OPENCLAW_PREPEND_PATH}:$PATH"; unset OPENCLAW_PREPEND_PATH; '
     : "";
-  // Use absolute path for sh to avoid dependency on PATH resolution during exec.
-  args.push(params.containerName, "/bin/sh", "-lc", `${pathExport}${params.command}`);
+  args.push("-u", "1000:1000", params.containerName, "/bin/bash", "-lc", `${params.command}`);
   return args;
 }
 
