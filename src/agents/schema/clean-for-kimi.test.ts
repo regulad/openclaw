@@ -146,6 +146,7 @@ describe("clean-for-kimi", () => {
     expect(isKimiSchemaCompactionTarget("moonshot")).toBe(false);
     expect(isKimiSchemaCompactionTarget("moonshot", "kimi-k2.5")).toBe(true);
     expect(isKimiSchemaCompactionTarget("moonshot", "moonshot-v1-8k")).toBe(false);
+    expect(isKimiSchemaCompactionTarget("kimi-code", "kimi-k2.5")).toBe(false);
     expect(isKimiSchemaCompactionTarget("kimi-coding", "kimi-k2.5")).toBe(false);
     expect(isKimiSchemaCompactionTarget("anthropic", "claude-sonnet-4-6")).toBe(false);
     expect(isKimiSchemaCompactionTarget("openai", "gpt-5")).toBe(false);

@@ -1,3 +1,5 @@
+import { normalizeProviderId } from "../model-selection.js";
+
 const KIMI_NOISY_SCHEMA_KEYS = new Set([
   "$schema",
   "$id",
@@ -192,7 +194,7 @@ export function compactToolSchemaForKimi(
 }
 
 export function isKimiSchemaCompactionTarget(modelProvider?: string, modelId?: string): boolean {
-  const provider = modelProvider?.trim().toLowerCase() ?? "";
+  const provider = modelProvider ? normalizeProviderId(modelProvider) : "";
   if (provider.includes("kimi-coding") || provider.includes("anthropic")) {
     return false;
   }
