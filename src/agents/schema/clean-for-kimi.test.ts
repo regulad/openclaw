@@ -59,6 +59,49 @@ describe("clean-for-kimi", () => {
     expect(count?.maximum).toBeUndefined();
   });
 
+  it("inlines local refs before dropping defs", () => {
+    const cleaned = compactToolSchemaForKimi({
+      type: "object",
+      properties: {
+        child: { $ref: "#/$defs/Child" },
+      },
+      $defs: {
+        Child: {
+          type: "object",
+          description: "Child payload",
+          properties: {
+            name: {
+              type: "string",
+              minLength: 1,
+            },
+          },
+        },
+      },
+    }) as {
+      $defs?: unknown;
+      properties?: Record<string, unknown>;
+    };
+
+    const child = cleaned.properties?.child as
+      | {
+          $ref?: unknown;
+          description?: unknown;
+          properties?: Record<string, unknown>;
+        }
+      | undefined;
+    const name = child?.properties?.name as
+      | {
+          minLength?: unknown;
+        }
+      | undefined;
+
+    expect(cleaned.$defs).toBeUndefined();
+    expect(child?.$ref).toBeUndefined();
+    expect(child?.description).toBeUndefined();
+    expect(child?.properties?.name).toBeDefined();
+    expect(name?.minLength).toBeUndefined();
+  });
+
   it("omits heavyweight sessions_spawn parameters", () => {
     const cleaned = compactToolSchemaForKimi(
       {
@@ -100,7 +143,8 @@ describe("clean-for-kimi", () => {
   it("targets Kimi-compatible OpenAI models but not kimi-coding", () => {
     expect(isKimiSchemaCompactionTarget("nvidia-nim", "moonshotai/kimi-k2.5")).toBe(true);
     expect(isKimiSchemaCompactionTarget("openrouter", "@preset/kimi-2-5")).toBe(true);
-    expect(isKimiSchemaCompactionTarget("moonshot")).toBe(true);
+    expect(isKimiSchemaCompactionTarget("moonshot")).toBe(false);
+    expect(isKimiSchemaCompactionTarget("moonshot", "kimi-k2.5")).toBe(true);
     expect(isKimiSchemaCompactionTarget("moonshot", "moonshot-v1-8k")).toBe(false);
     expect(isKimiSchemaCompactionTarget("kimi-coding", "kimi-k2.5")).toBe(false);
     expect(isKimiSchemaCompactionTarget("anthropic", "claude-sonnet-4-6")).toBe(false);
