@@ -455,6 +455,7 @@ export function buildSandboxCreateArgs(params: {
       args.push("-v", bind);
     }
   }
+  args.push("--userns=keep-id");
   return args;
 }
 
@@ -546,9 +547,9 @@ export async function ensureSandboxContainer(params: {
   let hashMismatch = false;
   let registryEntry:
     | {
-        lastUsedAtMs: number;
-        configHash?: string;
-      }
+      lastUsedAtMs: number;
+      configHash?: string;
+    }
     | undefined;
   if (hasContainer) {
     const registry = await readRegistry();
