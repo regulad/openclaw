@@ -96,6 +96,8 @@ export function runDockerSandboxShellCommand(
   const dockerArgs = [
     "exec",
     "-i",
+    "-u",
+    "1000:1000",
     params.containerName,
     "sh",
     "-c",
