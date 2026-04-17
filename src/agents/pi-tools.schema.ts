@@ -6,6 +6,7 @@ import { normalizeLowercaseStringOrEmpty } from "../shared/string-coerce.js";
 import { copyChannelAgentToolMeta } from "./channel-tools.js";
 import type { AnyAgentTool } from "./pi-tools.types.js";
 import { cleanSchemaForGemini } from "./schema/clean-for-gemini.js";
+import { compactToolSchemaForKimi, isKimiSchemaCompactionTarget } from "./schema/clean-for-kimi.js";
 
 function extractEnumValues(schema: unknown): unknown[] | undefined {
   if (!schema || typeof schema !== "object") {
@@ -151,15 +152,22 @@ export function normalizeToolParameterSchema(
     normalizedProvider.includes("google") || normalizedProvider.includes("gemini");
   const isAnthropicProvider = normalizedProvider.includes("anthropic");
   const unsupportedToolSchemaKeywords = resolveUnsupportedToolSchemaKeywords(options?.modelCompat);
+  const isKimiSchemaTarget = isKimiSchemaCompactionTarget(normalizedProvider, options?.modelId);
 
   function applyProviderCleaning(s: unknown): unknown {
+    let cleaned = s;
     if (isGeminiProvider && !isAnthropicProvider) {
-      return cleanSchemaForGemini(s);
+      cleaned = cleanSchemaForGemini(cleaned);
     }
     if (unsupportedToolSchemaKeywords.size > 0) {
       return stripUnsupportedSchemaKeywords(s, unsupportedToolSchemaKeywords);
     }
-    return s;
+    if (isKimiSchemaTarget) {
+      cleaned = compactToolSchemaForKimi(cleaned, {
+        toolName: (schema as unknown as AnyAgentTool).name,
+      });
+    }
+    return cleaned;
   }
 
   const conditionalKey = getTopLevelConditionalKey(schemaRecord);
